@@ -1,106 +1,136 @@
 package ac.cr.ucenfotec.communication_service.controller;
 
-import ac.cr.ucenfotec.communication_service.dto.SystemId;
-import ac.cr.ucenfotec.communication_service.model.InvalidMessageRequest;
-import ac.cr.ucenfotec.communication_service.model.MessageRequest;
-import ac.cr.ucenfotec.communication_service.model.MessageResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@WebMvcTest(MessageController.class)
 class MessageControllerTest {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    @Autowired
+    private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-
     }
 
+    private final String url = "/api/mensaje";
+
     @Test
-    void sendMessage() throws JsonProcessingException {
-        JsonNode mensajeJson = mapper.readTree("""
+    void sendMessageSuccessfully() throws Exception {
+        String validJson = """
             {
-                "tipo": "PRUEBA",
-                "contenido": "Mensaje de prueba"
+                "emisor": "S02_REC",
+                "receptor": "S04_ENT",
+                "mensaje": {
+                    "tipo": "PRUEBA",
+                    "contenido": "Mensaje de prueba"
+                }
             }
-        """);
-        MessageRequest messageRequest = new MessageRequest(SystemId.S02_REC, SystemId.S04_ENT, mensajeJson);
+        """;
 
-        ResponseEntity<MessageResponse> response = messageController.sendMessage(messageRequest);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        mockMvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(validJson))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void sendEmptyMessage() throws JsonProcessingException {
-        JsonNode mensajeJson = mapper.readTree("""
+    void sendEmptyMessage() throws Exception {
+        String json = """
             {
+                "emisor": "S02_REC",
+                "receptor": "S04_ENT",
+                "mensaje": {}
             }
-        """);
-        MessageRequest messageRequest = new MessageRequest(SystemId.S02_REC, SystemId.S04_ENT, mensajeJson);
+        """;
 
-        ResponseEntity<MessageResponse> response = messageController.sendMessage(messageRequest);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        mockMvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void sendNullMessage() {
-        MessageRequest messageRequest = new MessageRequest(SystemId.S02_REC, SystemId.S04_ENT, null);
-
-        ResponseEntity<MessageResponse> response = messageController.sendMessage(messageRequest);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    }
-
-    @Test
-    void sendInvalidFormatMessage() {
-        InvalidMessageRequest invalidMessageRequest = new InvalidMessageRequest("invalidSender",
-                "invalidReceptor", "Invalid message");
-
-        ResponseEntity<MessageResponse> response = messageController.sendMessage(invalidMessageRequest);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    }
-
-    @Test
-    void sendInvalidSenderMessage() throws JsonProcessingException {
-        JsonNode mensajeJson = mapper.readTree("""
+    void sendNullMessage() throws Exception {
+        String json = """
             {
-                "tipo": "PRUEBA",
-                "contenido": "Mensaje de prueba"
+                "emisor": "S02_REC",
+                "receptor": "S04_ENT",
+                "mensaje": null
             }
-        """);
-        MessageRequest messageRequest = new MessageRequest(null, SystemId.S02_REC, mensajeJson);
+        """;
 
-        ResponseEntity<MessageResponse> response = messageController.sendMessage(messageRequest);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        mockMvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void sendInvalidReceptorMessage() throws JsonProcessingException {
-        JsonNode mensajeJson = mapper.readTree("""
+    void sendInvalidJsonFormat() throws Exception {
+        String invalidJson = """
             {
-                "tipo": "PRUEBA",
-                "contenido": "Mensaje de prueba"
-            }
-        """);
-        MessageRequest messageRequest = new MessageRequest(SystemId.S01_COM, null, mensajeJson);
+                "emisor": "S02_REC",
+                "receptor": "S04_ENT",
+                "mensaje":
+            """;
 
-        ResponseEntity<MessageResponse> response = messageController.sendMessage(messageRequest);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        mockMvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void testSendMessage() {
+    void sendInvalidSender() throws Exception {
+        String json = """
+            {
+                "emisor": "XXXX_123",
+                "receptor": "S04_ENT",
+                "mensaje": { "data": 1 }
+            }
+        """;
+
+        mockMvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void sendInvalidReceptor() throws Exception {
+        String json = """
+            {
+                "emisor": "S02_REC",
+                "receptor": "NOPE",
+                "mensaje": { "data": 1 }
+            }
+        """;
+
+        mockMvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void missingFields() throws Exception {
+        String json = """
+            {
+                "emisor": "S02_REC"
+            }
+        """;
+
+        mockMvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
     }
 }
