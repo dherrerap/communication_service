@@ -12,15 +12,23 @@ import java.util.UUID;
 @Service
 public class MessageService {
 
+    private final QueueService queueService;
+
+    public MessageService(QueueService queueService) {
+        this.queueService = queueService;
+    }
+
     public MessageResponse processMessage(MessageRequest request) {
         validateSystemIds(request);
         validateMessage(request.getMensaje());
+
+        queueService.enqueue(request);
 
         MessageResponse response = new MessageResponse();
         response.setId(UUID.randomUUID().toString());
         response.setEmisor(request.getEmisor());
         response.setReceptor(request.getReceptor());
-        response.setMensaje(request.getMensaje().toString());
+        response.setMensaje(request.getMensaje());
         response.setTimestamp(Instant.now());
 
         return response;
