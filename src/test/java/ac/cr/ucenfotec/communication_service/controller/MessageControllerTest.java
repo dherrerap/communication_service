@@ -1,9 +1,13 @@
 package ac.cr.ucenfotec.communication_service.controller;
 
+import ac.cr.ucenfotec.communication_service.service.MessageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -15,6 +19,18 @@ class MessageControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private MessageService messageService;
+
+    @TestConfiguration
+    static class TestConfig {
+
+        @Bean
+        MessageService messageService() {
+            return Mockito.mock(MessageService.class);
+        }
+    }
 
     @BeforeEach
     void setUp() {
@@ -79,7 +95,7 @@ class MessageControllerTest {
             {
                 "emisor": "S02_REC",
                 "receptor": "S04_ENT",
-                "mensaje":
+                "mensaje": null
             """;
 
         mockMvc.perform(post(url)
@@ -131,6 +147,13 @@ class MessageControllerTest {
         mockMvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void sendEmptyBody() throws Exception {
+        mockMvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
 }
