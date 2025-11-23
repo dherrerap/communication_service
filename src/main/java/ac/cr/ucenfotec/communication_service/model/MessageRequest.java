@@ -14,6 +14,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MessageRequest {
 
+    private String id;
+
     @NotNull(message = "El emisor es obligatorio")
     @JsonProperty("emisor")
     private SystemId emisor;

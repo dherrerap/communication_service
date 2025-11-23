@@ -32,7 +32,7 @@ class MessageServiceTest {
             }
         """);
 
-        MessageRequest request = new MessageRequest(SystemId.S01_COM, SystemId.S02_REC, msg);
+        MessageRequest request = new MessageRequest(null, SystemId.S01_COM, SystemId.S02_REC, msg);
 
         MessageResponse response = messageService.processMessage(request);
 
@@ -51,7 +51,7 @@ class MessageServiceTest {
             {"k":"v"}
         """);
 
-        MessageRequest request = new MessageRequest(null, SystemId.S02_REC, msg);
+        MessageRequest request = new MessageRequest(null, null, SystemId.S02_REC, msg);
 
         assertThrows(IllegalArgumentException.class, () -> messageService.processMessage(request));
         verify(queueService, never()).enqueue(any());
@@ -63,7 +63,7 @@ class MessageServiceTest {
             {"k":"v"}
         """);
 
-        MessageRequest request = new MessageRequest(SystemId.S01_COM, null, msg);
+        MessageRequest request = new MessageRequest(null, SystemId.S01_COM, null, msg);
 
         assertThrows(IllegalArgumentException.class, () -> messageService.processMessage(request));
         verify(queueService, never()).enqueue(any());
@@ -71,7 +71,7 @@ class MessageServiceTest {
 
     @Test
     void processMessage_ShouldThrow_WhenMessageIsNull() {
-        MessageRequest request = new MessageRequest(SystemId.S01_COM, SystemId.S02_REC, null);
+        MessageRequest request = new MessageRequest(null, SystemId.S01_COM, SystemId.S02_REC, null);
 
         assertThrows(IllegalArgumentException.class, () -> messageService.processMessage(request));
         verify(queueService, never()).enqueue(any());
@@ -81,7 +81,7 @@ class MessageServiceTest {
     void processMessage_ShouldThrow_WhenMessageIsEmptyObject() throws Exception {
         JsonNode emptyMsg = mapper.readTree("{}");
 
-        MessageRequest request = new MessageRequest(SystemId.S01_COM, SystemId.S02_REC, emptyMsg);
+        MessageRequest request = new MessageRequest(null, SystemId.S01_COM, SystemId.S02_REC, emptyMsg);
 
         assertThrows(IllegalArgumentException.class, () -> messageService.processMessage(request));
         verify(queueService, never()).enqueue(any());

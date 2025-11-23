@@ -30,7 +30,7 @@ class QueueServiceTest {
             }
         """);
 
-        MessageRequest req = new MessageRequest(SystemId.S01_COM, SystemId.S02_REC, msg);
+        MessageRequest req = new MessageRequest(null, SystemId.S01_COM, SystemId.S02_REC, msg);
 
         queueService.enqueue(req);
 
@@ -47,8 +47,8 @@ class QueueServiceTest {
             }
         """);
 
-        MessageRequest r1 = new MessageRequest(SystemId.S01_COM, SystemId.S02_REC, msg);
-        MessageRequest r2 = new MessageRequest(SystemId.S03_REI, SystemId.S04_ENT, msg);
+        MessageRequest r1 = new MessageRequest(null, SystemId.S01_COM, SystemId.S02_REC, msg);
+        MessageRequest r2 = new MessageRequest(null, SystemId.S03_REI, SystemId.S04_ENT, msg);
 
         queueService.enqueue(r1);
         queueService.enqueue(r2);
@@ -66,7 +66,7 @@ class QueueServiceTest {
         }
         """);
 
-        MessageRequest req = new MessageRequest(SystemId.S01_COM, SystemId.S02_REC, msg);
+        MessageRequest req = new MessageRequest(null, SystemId.S01_COM, SystemId.S02_REC, msg);
 
         queueService.enqueue(req);
 
