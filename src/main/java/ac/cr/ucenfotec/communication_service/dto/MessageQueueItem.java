@@ -4,7 +4,6 @@ import ac.cr.ucenfotec.communication_service.model.MessageRequest;
 import ac.cr.ucenfotec.communication_service.model.MessageResponse;
 
 import java.time.Instant;
-import java.util.UUID;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
@@ -35,7 +34,7 @@ public class MessageQueueItem implements Delayed {
 
     public MessageResponse toResponse() {
         MessageResponse response = new MessageResponse();
-        response.setId(UUID.randomUUID().toString());
+        response.setId(request.getId());
         response.setEmisor(SystemId.valueOf(request.getEmisor().name()));
         response.setReceptor(SystemId.valueOf(request.getReceptor().name()));
         response.setMensaje(request.getMensaje());

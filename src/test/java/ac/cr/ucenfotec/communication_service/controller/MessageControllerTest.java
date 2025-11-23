@@ -12,8 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -189,7 +191,7 @@ class MessageControllerTest {
         mockResponse.setMensaje(mapper.readTree("{\"a\":1}"));
         mockResponse.setTimestamp(Instant.now());
 
-        when(queueService.getMessagesFor(SystemId.S02_REC))
+        when(messageService.getMessagesByReceptor(receptor))
                 .thenReturn(List.of(mockResponse));
 
         mockMvc.perform(get(GET_MESSAGES_URL + receptor))
@@ -215,6 +217,9 @@ class MessageControllerTest {
 
     @Test
     void getMessagesInvalidReceptor() throws Exception {
+        when(messageService.getMessagesByReceptor("INVALID_ID"))
+                .thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST));
+
         mockMvc.perform(get(GET_MESSAGES_URL + "INVALID_ID"))
                 .andExpect(status().isBadRequest());
     }
