@@ -1,10 +1,8 @@
 package ac.cr.ucenfotec.communication_service.controller;
 
-import ac.cr.ucenfotec.communication_service.dto.SystemId;
 import ac.cr.ucenfotec.communication_service.model.MessageRequest;
 import ac.cr.ucenfotec.communication_service.model.MessageResponse;
 import ac.cr.ucenfotec.communication_service.service.MessageService;
-import ac.cr.ucenfotec.communication_service.service.QueueService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
